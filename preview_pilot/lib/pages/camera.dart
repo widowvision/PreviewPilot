@@ -10,7 +10,7 @@ Future<CameraDescription> initializeCamera() async {
   // Obtain a list of the available cameras on the device.
   final cameras = await availableCameras();
   // Get a specific camera from the list of available cameras.
-  final firstCamera = cameras.first;
+  CameraDescription? firstCamera = cameras.first;
 
   runApp(
     MaterialApp(
