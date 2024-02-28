@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'pages/camera.dart';
+import 'package:camera/camera.dart';
+import 'pages/camera.dart' as cameraPage;
 import 'pages/overlay.dart'; 
 import 'pages/catalog.dart';
 import 'pages/share.dart';
 
+CameraDescription? firstCamera;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  firstCamera = await cameraPage.initializeCamera();
   runApp(MyApp());
 }
 
@@ -32,7 +36,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   final List<Widget> _children = [
-    CameraTab(),
+    if (firstCamera != null) cameraPage.TakePictureScreen(camera: firstCamera!),
     OverlayTab(),
     CatalogTab(),
     ShareTab(),
