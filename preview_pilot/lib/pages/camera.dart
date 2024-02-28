@@ -3,58 +3,51 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
-Future<CameraDescription> initializeCamera() async {
+CameraDescription? firstCamera;
+
+Future<CameraDescription?> initializeCamera() async {
   // Ensure that plugin services are initialized so that `availableCameras()`
   // can be called before `runApp()`
   WidgetsFlutterBinding.ensureInitialized();
   // Obtain a list of the available cameras on the device.
   final cameras = await availableCameras();
   // Get a specific camera from the list of available cameras.
-  CameraDescription? firstCamera = cameras.first;
+  firstCamera = cameras.first;
 
-  runApp(
-    MaterialApp(
-      theme: ThemeData.dark(),
-      home: TakePictureScreen(
-        // Pass the appropriate camera to the TakePictureScreen widget.
-        camera: firstCamera,
-      ),
-    ),
-  );
   return firstCamera;
 }
 
 // A screen that allows users to take a picture using a given camera.
 class TakePictureScreen extends StatefulWidget {
-  const TakePictureScreen({
-    super.key,
-    required this.camera,
-  });
-
-  final CameraDescription camera;
+  const TakePictureScreen({super.key,});
 
   @override
   TakePictureScreenState createState() => TakePictureScreenState();
 }
 
 class TakePictureScreenState extends State<TakePictureScreen> {
+
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
+  CameraDescription? _cameraDescription; 
 
   @override
   void initState() {
     super.initState();
-    // To display the current output from the Camera,
-    // create a CameraController.
-    _controller = CameraController(
-      // Get a specific camera from the list of available cameras.
-      widget.camera,
-      // Define the resolution to use.
-      ResolutionPreset.medium,
-    );
+    initializeCamera().then((CameraDescription? cameraDescription) {
+      setState(() {
+        _cameraDescription = cameraDescription;
+      });
 
-    // Next, initialize the controller. This returns a Future.
-    _initializeControllerFuture = _controller.initialize();
+      if (_cameraDescription != null) {
+        _controller = CameraController(
+          _cameraDescription!,
+          ResolutionPreset.medium,
+        );
+
+        _initializeControllerFuture = _controller.initialize();
+      }
+    });
   }
 
   @override
