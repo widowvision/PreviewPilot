@@ -3,11 +3,12 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
-CameraDescription? firstCamera;
+CameraDescription? firstCamera; // A variable to store the first camera, the ? allows for null values
 
+// A function that initializes the camera
 Future<CameraDescription?> initializeCamera() async {
+
   // Ensure that plugin services are initialized so that `availableCameras()`
-  // can be called before `runApp()`
   WidgetsFlutterBinding.ensureInitialized();
   // Obtain a list of the available cameras on the device.
   final cameras = await availableCameras();
@@ -79,8 +80,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       floatingActionButton: FloatingActionButton(
         // Provide an onPressed callback.
         onPressed: () async {
-          // Take the Picture in a try / catch block. If anything goes wrong,
-          // catch the error.
           try {
             // Ensure that the camera is initialized.
             await _initializeControllerFuture;
