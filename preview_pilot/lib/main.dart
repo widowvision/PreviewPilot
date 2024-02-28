@@ -31,7 +31,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   final List<Widget> _children = [
-    cameraPage.TakePictureScreen(),
+    ImageOptions(),
     OverlayTab(),
     CatalogTab(),
     ShareTab(),
@@ -72,5 +72,34 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _counter = index;
     });
+  }
+}
+
+class ImageOptions extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => cameraPage.TakePictureScreen()),
+              );
+            },
+            child: Text('Take a photo'),
+          ),
+          SizedBox(width: 16),
+          ElevatedButton(
+            onPressed: () {
+              // Handle 'upload a photo' button press
+            },
+            child: Text('Upload a photo'),
+          ),
+        ],
+      ),
+    );
   }
 }
