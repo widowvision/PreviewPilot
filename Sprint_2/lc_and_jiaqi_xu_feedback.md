@@ -7,7 +7,7 @@ Status as of 2/2 9:36, all feedback is uploaded and complete
 
 <table>
   <td>
-    Jiaqi Xu
+    Jiaqi Xu, Environmental Justice League
 
 Communications esp with client, powerpoint, google news API, wireframes
 
