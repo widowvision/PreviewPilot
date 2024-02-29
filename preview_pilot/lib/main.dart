@@ -96,7 +96,10 @@ class ImageOptions extends StatelessWidget {
           SizedBox(width: 16),
           ElevatedButton(
             onPressed: () {
-              // Handle 'upload a photo' button press
+             Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => camera.UploadPicture()),
+              );
             },
             child: Text('Upload a photo'),
           ),

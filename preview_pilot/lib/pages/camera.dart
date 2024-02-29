@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
 
 CameraDescription? firstCamera; // A variable to store the first camera, the ? allows for null values
 
@@ -111,6 +113,121 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   }
 }
 
+
+// For uploading a photo from the gallery
+class UploadPicture extends StatefulWidget {
+   const UploadPicture({super.key});
+
+  @override
+  UploadPictureState createState() => UploadPictureState();
+}
+
+class UploadPictureState extends State<UploadPicture> {
+  
+  // variable to hold the image
+  XFile? image;
+
+  // for opening the gallery to choose a picture
+  final ImagePicker picker = ImagePicker();
+
+  // function to wait for user to choose a photo
+  Future getImage(ImageSource media) async {
+    var img = await picker.pickImage(source: media);
+    if (img != null) {
+      Navigator.push(
+        context,
+
+        // forward to Display page
+        MaterialPageRoute(builder: (context) => DisplayPictureScreen(imagePath: img.path))
+      );
+    }
+
+    // assigning the chosen image to the image variable
+    setState(() {
+      image = img;
+    });
+  }
+
+
+  // This is the pop-up at the bottom to show the open gallery button.
+  void getPhotoAlert() {
+    showDialog(
+      context: context, 
+      builder: (BuildContext context) {
+        return AlertDialog(
+          alignment: const Alignment(0,1),
+          shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+          content: Container(
+            height: MediaQuery.of(context).size.height / 25,
+            width: MediaQuery.of(context).size.width,
+            margin: const EdgeInsets.all(0),
+            padding: const EdgeInsets.all(0),
+            child: SingleChildScrollView( 
+              child: Column(
+              children: [
+                // Button that opens gallery
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    getImage(ImageSource.gallery);
+                  }, 
+                  style: ElevatedButton.styleFrom(
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.zero)
+                      )
+                  ),
+                  child: const Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
+                        child: Row(
+                          children:[
+                            Icon(Icons.image),
+                            Text("Choose Photo from Gallery")
+                          ]
+                        )
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            )
+          ),
+        );
+      }
+    );
+  }
+
+  // Upload Photo button
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Upload Image")
+      ),
+      body: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                getPhotoAlert();
+              },
+              style: ElevatedButton.styleFrom(
+                shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.zero))
+              ),
+              child: const Text("Upload Photo"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // A widget that displays the picture taken by the user.
 class DisplayPictureScreen extends StatelessWidget {
   final String imagePath;
@@ -123,7 +240,7 @@ class DisplayPictureScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Display the Picture')),
       // The image is stored as a file on the device. Use the `Image.file`
       // constructor with the given path to display the image.
-      body: Image.file(File(imagePath)),
+      body: Image.file(File(imagePath))
     );
   }
 }
