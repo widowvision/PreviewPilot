@@ -7,7 +7,7 @@ Status as of 2/2 9:36, all feedback is uploaded and complete
 
 <table>
   <td>
-    Jiaqi
+    Jiaqi Xu
 
 Communications esp with client, powerpoint, google news API, wireframes
 
