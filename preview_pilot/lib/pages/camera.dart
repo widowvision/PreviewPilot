@@ -203,27 +203,11 @@ class UploadPictureState extends State<UploadPicture> {
   // Upload Photo button
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Upload Image")
-      ),
-      body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                getPhotoAlert();
-              },
-              style: ElevatedButton.styleFrom(
-                shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.zero))
-              ),
-              child: const Text("Upload Photo"),
-            ),
-          ],
-        ),
-      ),
+    return  ElevatedButton(
+      onPressed: () {
+        getPhotoAlert();
+      },
+        child: const Text("Upload a photo"),
     );
   }
 }
