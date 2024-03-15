@@ -80,6 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
 class ImageOptions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    context: context;
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -94,15 +95,7 @@ class ImageOptions extends StatelessWidget {
             child: Text('Take a photo'),
           ),
           SizedBox(width: 16),
-          ElevatedButton(
-            onPressed: () {
-             Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => camera.UploadPicture()),
-              );
-            },
-            child: Text('Upload a photo'),
-          ),
+          camera.UploadPicture()
         ],
       ),
     );
