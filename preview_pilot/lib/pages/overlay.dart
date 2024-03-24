@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 
+// Main widget for overlay with necesary callback functions
 class OverlayTab extends StatefulWidget {
   File? imageFile;
   final Function(int, File?)? onImageErased;
@@ -26,14 +27,13 @@ class _OverlayTabState extends State<OverlayTab> {
   Offset? startingFocalPoint;
 
   @override
-  void initState() {
+  void initState() {          // sets init scale/position
     super.initState();
     scale = widget.initialScale ?? 1.0;
     position = widget.initialPosition ?? Offset.zero;
   }
 
-  int _counter = 0;
-  double startScale = 1.0; // Scale value at the start of a scaling gesture
+  double startScale = 1.0;    // Scale value at the start of a scaling gesture
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +41,8 @@ class _OverlayTabState extends State<OverlayTab> {
       appBar: AppBar(
         title: Text('Edit Overlay'),
         actions: [
-          if (widget.imageFile != null)  // Display the close button if an image is selected
-            IconButton(onPressed: (){ // reset button to reset scale/position of overlay
+          if (widget.imageFile != null)   // Display the close button if an image is selected
+            IconButton(onPressed: (){     // reset button to reset scale/position of overlay
               setState(() {
                 scale = 1.0;
                 position = Offset.zero;
@@ -57,7 +57,8 @@ class _OverlayTabState extends State<OverlayTab> {
                 setState(() {
                   widget.imageFile = null;
                 });
-                widget.onImageErased!(0, widget.imageFile);
+                widget.onImageErased!(0, widget.imageFile); // callback when user erases the selected image
+                                                            // switches back to first tab and sets that to null.
               },
             ),
         ],
@@ -79,7 +80,7 @@ class _OverlayTabState extends State<OverlayTab> {
                 });
                 startingFocalPoint = details.localFocalPoint; // Update the focal point
 
-                widget.onOverlayUpdated!(scale, position);  // Callback function is called
+                widget.onOverlayUpdated!(scale, position);    // Callback function is called
               }
             },
 
