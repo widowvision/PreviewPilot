@@ -26,7 +26,9 @@ class _CameraTabState extends State<CameraTab> {
     setState(() {
       _controller = CameraController(
         firstCamera,
-        ResolutionPreset.medium,
+        ResolutionPreset.max,
+        enableAudio: false,
+    
       );
       _initializeControllerFuture = _controller!.initialize();
     });
@@ -73,40 +75,64 @@ class _CameraTabState extends State<CameraTab> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (_controller != null)
-            FutureBuilder<void>(
+// ----------------------------- After the user selects the 'take a photo' button --------------------------------
+          // When the camera is initialized, the controller will not be null
+          // FutureBuilder widget is built that displays the camera preview. 
+          // The Stack widget that is returned will contain a Container widget, along with a button to trigger
+          // the _takePicture function. 
+          // currently the aspect ratio is not correct on the CameraPreview
+          if (_controller != null) 
+            FutureBuilder<void>(   
               future: _initializeControllerFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
-                  return CameraPreview(_controller!); // Display the camera preview
+                  return Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.all(10),
+                        child: CameraPreview(_controller!),),
+                      Positioned(
+                        bottom: 50,
+                        child: FloatingActionButton(
+                            onPressed: _takePicture, 
+                            child: const Icon(Icons.photo_camera)),
+                      ),
+                    ] ,
+                  );
+
                 } else {
-                  return CircularProgressIndicator(); // Display a loading spinner
+                  return const CircularProgressIndicator(); // Display a loading spinner
                 }
               },
             )
-          else
-            ElevatedButton(
-              onPressed: _initializeCamera,
-              child: Text('Capture Photo'),
+          else            // Everything that shows before the camera controller is initialized
+            Column(
+              children: [
+                ElevatedButton(
+                  onPressed: _initializeCamera,
+                  child: const Text('Capture Photo'),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () async {
+                    // Use the image_picker package to select a photo from the gallery
+                    final picker = ImagePicker();
+                    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+                    if (pickedFile != null) {
+                      final file = File(pickedFile.path);
+                      setState(() {
+                        _imageFile = file;
+                      });
+
+                      widget.onImageSelected?.call(1, file);
+                    }
+                  },
+                  child: const Text('Upload a Photo'),
+                ),
+              ],
             ),
-          SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () async {
-              // Use the image_picker package to select a photo from the gallery
-              final picker = ImagePicker();
-              final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-              if (pickedFile != null) {
-                final file = File(pickedFile.path);
-                setState ((){    // Set the state of the image file to the selected file
-                  _imageFile = file;
-                });
-
-                widget.onImageSelected?.call(1, file);
-              }
-            },
-            child: Text('Upload a Photo'),
-          ),
         ],
       ),
     );
