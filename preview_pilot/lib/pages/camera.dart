@@ -1,230 +1,140 @@
-import 'dart:async';
-import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
+File? _imageFile;
 
-CameraDescription? firstCamera; // A variable to store the first camera, the ? allows for null values
+class CameraTab extends StatefulWidget {
+  final Function(int, File?)? onImageSelected; // Callback function to be called when an image is picked
 
-// A function that initializes the camera
-Future<CameraDescription?> initializeCamera() async {
-
-  // Ensure that plugin services are initialized so that `availableCameras()`
-  WidgetsFlutterBinding.ensureInitialized();
-  // Obtain a list of the available cameras on the device.
-  final cameras = await availableCameras();
-  // Get a specific camera from the list of available cameras.
-  firstCamera = cameras.first;
-
-  return firstCamera;
-}
-
-// A screen that allows users to take a picture using a given camera.
-class TakePictureScreen extends StatefulWidget {
-  const TakePictureScreen({super.key,});
+  CameraTab({this.onImageSelected});           // Constructor for the CameraTab class
 
   @override
-  TakePictureScreenState createState() => TakePictureScreenState();
+  _CameraTabState createState() => _CameraTabState(); // Create a state object for the CameraTab class
 }
 
-class TakePictureScreenState extends State<TakePictureScreen> {
+class _CameraTabState extends State<CameraTab> {
+  CameraController? _controller;
+  Future<void>? _initializeControllerFuture;
 
-  late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
-  CameraDescription? _cameraDescription; 
+  void _initializeCamera() async {
+    final cameras = await availableCameras();
+    final firstCamera = cameras.first;
 
-  @override
-  void initState() {
-    super.initState();
-    initializeCamera().then((CameraDescription? cameraDescription) {
+    setState(() {
+      _controller = CameraController(
+        firstCamera,
+        ResolutionPreset.max,
+        enableAudio: false,
+    
+      );
+      _initializeControllerFuture = _controller!.initialize();
+    });
+  }
+
+  Future<void> _takePicture() async {
+    if (_controller == null || !_controller!.value.isInitialized) {
+      print("Camera is not initialized");
+      return;
+    }
+
+    // Attempt to take a picture and get the XFile where the image is temporarily stored
+    try {
+      final XFile image = await _controller!.takePicture();
+
+      // Optionally, you can save the image to a permanent location
+      final directory = await getTemporaryDirectory(); // or getApplicationDocumentsDirectory();
+      final String imagePath = '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final File imageFile = File(imagePath);
+
+      // Copy the file to a new path
+      await image.saveTo(imagePath);
+
       setState(() {
-        _cameraDescription = cameraDescription;
+        _imageFile = imageFile;
       });
 
-      if (_cameraDescription != null) {
-        _controller = CameraController(
-          _cameraDescription!,
-          ResolutionPreset.medium,
-        );
-
-        _initializeControllerFuture = _controller.initialize();
-      }
-    });
+      // Call the callback to pass the image back to the parent widget
+      widget.onImageSelected?.call(1, _imageFile);
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
   void dispose() {
-    // Dispose of the controller when the widget is disposed.
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Take a picture')),
-      // You must wait until the controller is initialized before displaying the
-      // camera preview. Use a FutureBuilder to display a loading spinner until the
-      // controller has finished initializing.
-      body: FutureBuilder<void>(
-        future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            // If the Future is complete, display the preview.
-            return CameraPreview(_controller);
-          } else {
-            // Otherwise, display a loading indicator.
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        // Provide an onPressed callback.
-        onPressed: () async {
-          try {
-            // Ensure that the camera is initialized.
-            await _initializeControllerFuture;
-
-            // Attempt to take a picture and get the file `image`
-            // where it was saved.
-            final image = await _controller.takePicture();
-
-            if (!context.mounted) return;
-
-            // If the picture was taken, display it on a new screen.
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => DisplayPictureScreen(
-                  // Pass the automatically generated path to
-                  // the DisplayPictureScreen widget.
-                  imagePath: image.path,
-                ),
-              ),
-            );
-          } catch (e) {
-            // If an error occurs, log the error to the console.
-            print(e);
-          }
-        },
-        child: const Icon(Icons.camera_alt),
-      ),
-    );
-  }
-}
-
-
-// For uploading a photo from the gallery
-class UploadPicture extends StatefulWidget {
-   const UploadPicture({super.key});
-
-  @override
-  UploadPictureState createState() => UploadPictureState();
-}
-
-class UploadPictureState extends State<UploadPicture> {
-  
-  // variable to hold the image
-  XFile? image;
-
-  // for opening the gallery to choose a picture
-  final ImagePicker picker = ImagePicker();
-
-  // function to wait for user to choose a photo
-  Future getImage(ImageSource media) async {
-    var img = await picker.pickImage(source: media);
-    if (img != null) {
-      Navigator.push(
-        context,
-
-        // forward to Display page
-        MaterialPageRoute(builder: (context) => DisplayPictureScreen(imagePath: img.path))
-      );
-    }
-
-    // assigning the chosen image to the image variable
-    setState(() {
-      image = img;
-    });
-  }
-
-
-  // This is the pop-up at the bottom to show the open gallery button.
-  void getPhotoAlert() {
-    showDialog(
-      context: context, 
-      builder: (BuildContext context) {
-        return AlertDialog(
-          alignment: const Alignment(0,1),
-          shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
-          content: Container(
-            height: MediaQuery.of(context).size.height / 25,
-            width: MediaQuery.of(context).size.width,
-            margin: const EdgeInsets.all(0),
-            padding: const EdgeInsets.all(0),
-            child: SingleChildScrollView( 
-              child: Column(
-              children: [
-                // Button that opens gallery
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    getImage(ImageSource.gallery);
-                  }, 
-                  style: ElevatedButton.styleFrom(
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.zero)
-                      )
-                  ),
-                  child: const Row(
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+// ----------------------------- After the user selects the 'take a photo' button --------------------------------
+          // When the camera is initialized, the controller will not be null
+          // FutureBuilder widget is built that displays the camera preview. 
+          // The Stack widget that is returned will contain a Container widget, along with a button to trigger
+          // the _takePicture function. 
+          // currently the aspect ratio is not correct on the CameraPreview
+          if (_controller != null) 
+            FutureBuilder<void>(   
+              future: _initializeControllerFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Stack(
+                    alignment: Alignment.bottomCenter,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
-                        child: Row(
-                          children:[
-                            Icon(Icons.image),
-                            Text("Choose Photo from Gallery")
-                          ]
-                        )
+                      Container(
+                        margin: const EdgeInsets.all(10),
+                        child: CameraPreview(_controller!),),
+                      Positioned(
+                        bottom: 50,
+                        child: FloatingActionButton(
+                            onPressed: _takePicture, 
+                            child: const Icon(Icons.photo_camera)),
                       ),
-                    ],
-                  ),
+                    ] ,
+                  );
+
+                } else {
+                  return const CircularProgressIndicator(); // Display a loading spinner
+                }
+              },
+            )
+          else            // Everything that shows before the camera controller is initialized
+            Column(
+              children: [
+                ElevatedButton(
+                  onPressed: _initializeCamera,
+                  child: const Text('Capture Photo'),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () async {
+                    // Use the image_picker package to select a photo from the gallery
+                    final picker = ImagePicker();
+                    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+                    if (pickedFile != null) {
+                      final file = File(pickedFile.path);
+                      setState(() {
+                        _imageFile = file;
+                      });
+
+                      widget.onImageSelected?.call(1, file);
+                    }
+                  },
+                  child: const Text('Upload a Photo'),
                 ),
               ],
             ),
-            )
-          ),
-        );
-      }
-    );
-  }
-
-  // Upload Photo button
-  @override
-  Widget build(BuildContext context) {
-    return  ElevatedButton(
-      onPressed: () {
-        getPhotoAlert();
-      },
-        child: const Text("Upload a photo"),
-    );
-  }
-}
-
-// A widget that displays the picture taken by the user.
-class DisplayPictureScreen extends StatelessWidget {
-  final String imagePath;
-
-  const DisplayPictureScreen({super.key, required this.imagePath});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Display the Picture')),
-      // The image is stored as a file on the device. Use the `Image.file`
-      // constructor with the given path to display the image.
-      body: Image.file(File(imagePath))
+        ],
+      ),
     );
   }
 }
