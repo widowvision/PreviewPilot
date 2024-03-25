@@ -4,6 +4,7 @@ import 'pages/overlay.dart';
 import 'pages/catalog.dart';
 import 'pages/share.dart';
 import 'dart:io';
+import 'package:share_plus/share_plus.dart';
 
 
 void main() async {   // main widget
@@ -99,8 +100,17 @@ class _MyHomePageState extends State<MyHomePage> {
     // When there is no info exchanged between tabs, might be useless by the end of the project
     // only called when user taps on different tabs.
     void switchTab(int index) {
-    setState(() {
-      _counter = index;
-    });
+      if (index == 3) { // Check if the "Share" tab is tapped (index 3 corresponds to the "Share" tab)
+        sharePressed(); // Call the sharePressed() method
+      } else {
+      setState(() {
+        _counter = index;
+      });
+    }
+  }
+
+  void sharePressed() {
+    String message = "Please review the following proof.";
+    Share.share(message);
   }
 }
