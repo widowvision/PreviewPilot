@@ -97,3 +97,21 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
   assets:
     - assets/images/
+    - assets/images/four_six_trap/001.png
+    - assets/images/four_six_trap/001a.png
+    - assets/images/four_six_trap/001ad.png
+    - assets/images/four_six_trap/001b.png
+    - assets/images/four_six_trap/001bd.png
+    - assets/images/four_six_trap/001c.png
+    - assets/images/four_six_trap/001d.png
+    - assets/images/three_six_flat/002.png
+    - assets/images/three_six_flat/002a.png
+    - assets/images/three_six_flat/002b.png
+    - assets/images/three_eight_trap/003.png
+    - assets/images/three_eight_trap/003a.png
+    - assets/images/three_eight_trap/003b.png
+    - assets/images/three_eight_trap/003bd.png
+    - assets/images/three_eight_trap/003c.png
+    - assets/images/three_eight_trap/003cd.png
+    - assets/images/three_eight_trap/003d.png
+    

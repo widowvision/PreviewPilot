@@ -3,6 +3,7 @@ import 'pages/camera.dart';
 import 'pages/overlay.dart'; 
 import 'pages/catalog.dart';
 import 'pages/share.dart';
+import 'pages/config_seed.dart';
 import 'dart:io';
 import 'package:share_plus/share_plus.dart';
 
@@ -54,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
         onOverlayUpdated: updateOverlayState,
         initialScale: _overlayScale,
         initialPosition: _overlayPosition,),
-        CatalogTab(),
+        CatalogTab(overlayConfigs: designs),
         ShareTab(),
       ]; 
 
