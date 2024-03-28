@@ -3,6 +3,8 @@
 most updated brach (used for demo day): *add-catalog*
 https://github.com/widowvision/PreviewPilot/tree/add-catalog
 
+Timesheet: https://docs.google.com/spreadsheets/d/1yvxkjqve-hevw9kd90fCTwTSxcFz4l2dB0f_fXApMUg/edit?pli=1#gid=660968084
+
 **GOALS FOR SPRINT 3**
 
 - [x] Fix double upload photo bug
